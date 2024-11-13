@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "monflask.fullname" . }}
+  labels:
+    {{- include "monflask.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "monflask.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        {{- toYaml .Values.podAnnotations | nindent 8 }}
+      labels:
+        {{- include "monflask.labels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "monflask.serviceAccountName" . }}
+      containers:
+        - name: flask
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.flask.servicePort }}
+              protocol: TCP
+          env:
+            - name: MONGO_URI
+              value: "{{ .Values.flask.MONGO_URI }}"
+          livenessProbe:
+            {{- toYaml .Values.livenessProbe | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.readinessProbe | nindent 12 }}
+        - name: mongodb
+          image: "{{ .Values.mongodb.image.repository }}:{{ .Values.mongodb.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.mongodb.service.port }}
+              protocol: TCP
+          env:
+            - name: MONGODB_ROOT_PASSWORD
+              value: "{{ .Values.mongodb.rootPassword }}"
+          livenessProbe:
+            {{- toYaml .Values.mongodb.livenessProbe | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.mongodb.readinessProbe | nindent 12 }}
+
+

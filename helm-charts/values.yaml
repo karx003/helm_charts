@@ -1,0 +1,69 @@
+replicaCount: 1
+image:
+  repository: karthik0603/flask-app003
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+flask:
+  MONGO_URI: "mongodb://root:mysecurepassword2@new36-release-monflask:27017/mydatabase?authSource=admin"
+  servicePort: 5000
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: false
+  automount: false
+  annotations: {}
+  name: ""
+
+service:
+  type: ClusterIP
+  port: 5000
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+
+resources: {}
+
+livenessProbe:
+  httpGet:
+    path: /
+    port: 5000
+readinessProbe:
+  httpGet:
+    path: /
+    port: 5000
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+
+mongodb:
+  image:
+    repository: bitnami/mongodb
+    pullPolicy: IfNotPresent
+    tag: "latest"
+  rootPassword: mysecurepassword2
+  service:
+    type: ClusterIP
+    port: 27017
+  livenessProbe:
+    httpGet:
+      path: /
+      port: 27017
+  readinessProbe:
+    httpGet:
+      path: /
+      port: 27017
+
